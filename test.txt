@@ -1,0 +1,29 @@
+//the class itself
+class todolistweb{
+    constructor(){
+        //the data or known as "Properties" of a class
+        this.todos = [];
+        this.txt1 = document.getElementById("txt1");
+        this.todoInput = document.getElementById("todoInput");
+        this.addTodo = document.getElementById("addTodo");
+        this.todoList = document.getElementById("todoList");
+    }
+    //the functions or known as "Methods" inside the class
+    outputtest(){
+    // const todoInput = document.getElementById("addTodo");
+    // return this.txt1;
+    console.log("txt1");
+    addTodo.addEventListener("click", function (){
+    console.log("button has been clicked!");
+});
+
+    }
+}
+// addTodo.addEventListener("click", function (){
+//     console.log("button has been clicked!");
+// });
+
+
+const txtoutput = new todolistweb();
+
+console.log("txt1");
