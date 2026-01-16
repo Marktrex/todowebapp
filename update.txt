@@ -1,3 +1,4 @@
-Version 1.1
+Version 1.2
 -todo list enter button is now working
 -the data is being saved in an array
+-added some comments so that i know what is happening

@@ -14,12 +14,14 @@ const todoLists = document.getElementById("todoLists");
 
 //Enter button function
 enterBtn.addEventListener("click", function(){
-    let text = inputType.value;
+    let text = inputType.value; //i am putting the input type value in a variable text
 
-    if(text === "") return;
+    if(text === "") return; //if the input type is empty, it will not work
 
-    lists.push(text);
+    lists.push(text); //this will push or put the data in the lists array
     
     todoLists.innerHTML = lists.join("<br>");
+
+    inputType.value = "" //this code is to clear the input type after adding something in the todo list
 });
 
