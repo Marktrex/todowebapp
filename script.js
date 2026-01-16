@@ -18,6 +18,8 @@ enterBtn.addEventListener("click", function(){
 
     if(text === "") return;
 
+    lists.push(text);
     
+    todoLists.innerHTML = lists.join("<br>");
 });
 

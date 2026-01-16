@@ -1,2 +1,3 @@
-Version 1
--created a simple todo list web app
+Version 1.1
+-todo list enter button is now working
+-the data is being saved in an array

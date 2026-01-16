@@ -1,29 +1,43 @@
-//the class itself
-class todolistweb{
-    constructor(){
-        //the data or known as "Properties" of a class
-        this.todos = [];
-        this.txt1 = document.getElementById("txt1");
-        this.todoInput = document.getElementById("todoInput");
-        this.addTodo = document.getElementById("addTodo");
-        this.todoList = document.getElementById("todoList");
-    }
-    //the functions or known as "Methods" inside the class
-    outputtest(){
-    // const todoInput = document.getElementById("addTodo");
-    // return this.txt1;
-    console.log("txt1");
-    addTodo.addEventListener("click", function (){
-    console.log("button has been clicked!");
-});
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Simple Task List</title>
+</head>
+<body>
 
-    }
-}
-// addTodo.addEventListener("click", function (){
-//     console.log("button has been clicked!");
-// });
+  <h2>My Tasks</h2>
 
+  <input type="text" id="taskInput" placeholder="Type a task">
+  <button id="addBtn">Add Task</button>
 
-const txtoutput = new todolistweb();
+  <ul id="taskList"></ul>
 
-console.log("txt1");
+  <script>
+    // Get elements from the page
+    var input = document.getElementById("taskInput");
+    var button = document.getElementById("addBtn");
+    var list = document.getElementById("taskList");
+
+    // What happens when button is clicked
+    button.onclick = function () {
+
+      // Get what the user typed
+      var text = input.value;
+
+      // Stop if empty
+      if (text === "") return;
+
+      // Create a list item
+      var li = document.createElement("li");
+      li.textContent = text;
+
+      // Add to the list
+      list.appendChild(li);
+
+      // Clear input
+      input.value = "";
+    };
+  </script>
+
+</body>
+</html>
