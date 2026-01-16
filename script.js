@@ -6,22 +6,18 @@ System flow
 - a function that if the todo has been clicked, it will be removed
 and refresh the list
 */
-const todoInput = document.getElementById("todoInput");
-const addBtn = document.getElementById("addBtn");
-const todoList = document.getElementById("todoList");
+let lists = [];
 
-let todos = [];
+const inputType = document.getElementById("inputType");
+const enterBtn = document.getElementById("enterBtn");
+const todoLists = document.getElementById("todoLists");
 
-function addTodoList(){
- const text = todoInput.value;
+//Enter button function
+enterBtn.addEventListener("click", function(){
+    let text = inputType.value;
 
- if (text === "") {
-    return;
- } else {
-    todos.push({
-        text:text,
-        completed:false,
-    })
- }
-};
+    if(text === "") return;
+
+    
+});
 
