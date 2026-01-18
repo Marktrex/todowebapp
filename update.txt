@@ -1,4 +1,9 @@
+Version 1
+-added basic html and javascript structure
 Version 1.2
 -todo list enter button is now working
 -the data is being saved in an array
 -added some comments so that i know what is happening
+Version 1.3
+-added a delete function just click the list 
+- semi functional as long as you dont reload the web
