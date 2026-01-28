@@ -18,3 +18,7 @@ completed: it will remove the data from the list forever
 -delete buttons
 todo: it will remove the data/text from the todo list
 completed: it will move the data/text from completed to todo list
+
+Version 2
+-added new folders and files
+-added models, routes and server.js(currently working)
