@@ -23,6 +23,10 @@ router.post("/register", async (req, res) => {
 
 
 // LOGIN
+const jwt = require("jsonwebtoken");
+
+const JWT_SECRET = "secretcodexd"; // for testing only: next time i will use .env
+
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -37,6 +41,9 @@ router.post("/login", async (req, res) => {
   if (!isMatch) {
     return res.json({ message: "Wrong password" });
   }
+
+    // ✅ Create token
+  const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: "1h" });
 
   res.json({ message: "Login successful" });
 });
