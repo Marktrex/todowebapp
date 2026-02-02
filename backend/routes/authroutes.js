@@ -1,51 +1,74 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
 const User = require("../models/user");
+const EmailConfig = require("../models/emailconfig");
 
 const router = express.Router();
+const SECRET = process.env.JWT_SECRET;
+
+async function getTransporter(){
+  const config = await EmailConfig.findOne();
+
+  return nodemailer.createTransport({
+    service: "gmail",
+    auth:{
+      user: config.email,
+      pass: config.password
+    }
+  });
+}
 
 
 // REGISTER
-router.post("/register", async (req, res) => {
-  const { email, password } = req.body;
+router.post("/register", async(req,res)=>{
+  const {email,password} = req.body;
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const hash = await bcrypt.hash(password,10);
+  const code = Math.floor(100000 + Math.random()*900000);
 
-  const user = new User({
-    email: email,
-    password: hashedPassword
+  await User.create({ email, password:hash, code });
+  
+  const transporter = await getTransporter();
+  await transporter.sendMail({
+    to: email,
+    subject: "Verify Code",
+    text: "Your code: " + code
   });
 
-  await user.save();
+  res.json("Registered. Check email.");
+});
 
-  res.json({ message: "User registered" });
+
+// VERIFY
+router.post("/verify", async(req,res)=>{
+  const {email,code} = req.body;
+
+  const user = await User.findOne({email});
+
+  if(user.code == code){
+    user.verified = true;
+    await user.save();
+    return res.json("Verified");
+  }
+
+  res.json("Wrong code");
 });
 
 
 // LOGIN
-const jwt = require("jsonwebtoken");
+router.post("/login", async(req,res)=>{
+  const {email,password} = req.body;
 
-const JWT_SECRET = "secretcodexd"; // for testing only: next time i will use .env
+  const user = await User.findOne({email});
+  if(!user || !user.verified) return res.json("Not verified");
 
-router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  const match = await bcrypt.compare(password,user.password);
+  if(!match) return res.json("Wrong password");
 
-  const user = await User.findOne({ email });
-
-  if (!user) {
-    return res.json({ message: "User not found" });
-  }
-
-  const isMatch = await bcrypt.compare(password, user.password);
-
-  if (!isMatch) {
-    return res.json({ message: "Wrong password" });
-  }
-
-    // ✅ Create token
-  const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: "1h" });
-
-  res.json({ message: "Login successful" });
+  const token = jwt.sign({id:user._id},SECRET);
+  res.json({token});
 });
 
 module.exports = router;
