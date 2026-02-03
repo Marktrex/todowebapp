@@ -21,60 +21,70 @@ async function getTransporter(){
   });
 }
 
-
-
 // REGISTER
 router.post("/register", async(req,res)=>{
   const {email,password} = req.body;
   
-  //this is duplicate check code to avoid tons of same email registered
   const exists = await User.findOne({email});
-  if(exists) return res.json("Email already registered");
+  // 409 Conflict: The email is already taken
+  if(exists) return res.status(409).json({ message: "Email already registered" });
 
   const hash = await bcrypt.hash(password,10);
   const code = Math.floor(100000 + Math.random()*900000);
 
   await User.create({ email, password:hash, code });
   
-  const transporter = await getTransporter();
-  await transporter.sendMail({
-    to: email,
-    subject: "Verify Code",
-    text: "Your code: " + code
-  });
-
-  res.json("Registered. Check email.");
+  try {
+    const transporter = await getTransporter();
+    await transporter.sendMail({
+      to: email,
+      subject: "Verify Code",
+      text: "Your code: " + code
+    });
+    // 201 Created: Standard for successful registration
+    res.status(201).json({ message: "Registered. Check email." });
+  } catch (error) {
+    // 500 Internal Server Error: If the email fails to send
+    res.status(500).json({ message: "User created but email failed to send" });
+  }
 });
-
 
 // VERIFY
 router.post("/verify", async(req,res)=>{
   const {email,code} = req.body;
-
   const user = await User.findOne({email});
+
+  if(!user) return res.status(404).json({ message: "User not found" });
 
   if(user.code == code){
     user.verified = true;
     await user.save();
-    return res.json("Verified");
+    // 200 OK: Request succeeded
+    return res.status(200).json({ message: "Verified" });
   }
 
-  res.json("Wrong code");
+  // 400 Bad Request: The client sent the wrong code
+  res.status(400).json({ message: "Wrong code" });
 });
-
 
 // LOGIN
 router.post("/login", async(req,res)=>{
   const {email,password} = req.body;
 
   const user = await User.findOne({email});
-  if(!user || !user.verified) return res.json("Not verified");
+  
+  // 401 Unauthorized: Credentials (email/password) are wrong
+  if(!user) return res.status(401).json({ message: "Invalid credentials" });
+  
+  // 403 Forbidden: User is known but "blocked" because they aren't verified
+  if(!user.verified) return res.status(403).json({ message: "Account not verified" });
 
   const match = await bcrypt.compare(password,user.password);
-  if(!match) return res.json("Wrong password");
+  if(!match) return res.status(401).json({ message: "Invalid credentials" });
 
-const token = jwt.sign({ userId: user._id }, SECRET);
-  res.json({token});
+  const token = jwt.sign({ userId: user._id }, SECRET);
+  // 200 OK: Standard for successful login
+  res.status(200).json({ token });
 });
 
 module.exports = router;

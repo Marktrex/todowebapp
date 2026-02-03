@@ -30,15 +30,16 @@ Version 2
 -added new folders and files
 -added models, routes and server.js(currently working)
 
-Version 2.1 
+Version 2.2 
 -trying to add authorization on the website
 -added gmail and .env for authorization
 
-Verison 2.2
+Verison 2.3
 -added flow in top of the update.txt from start to end the coding
 -changed the version of mongodb from 8.2 to 6.0 because my pc is crashing
 -authroute from register to verify to login is now working
 -gmail is now working
 -added a quick duplicate chceck on email register
 
-
+Version 2.4
+-added error codes in authroutes and changed some codes inside
