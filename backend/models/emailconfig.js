@@ -5,4 +5,4 @@ const EmailConfigSchema = new mongoose.Schema({
   password: String
 });
 
-module.exports = mongoose.model("EmailConfig", EmailConfigSchema);
+module.exports = mongoose.model("emailconfig", EmailConfigSchema);

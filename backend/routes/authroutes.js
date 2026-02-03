@@ -10,6 +10,7 @@ const SECRET = process.env.JWT_SECRET;
 
 async function getTransporter(){
   const config = await EmailConfig.findOne();
+  if(!config) throw new Error("Email config not found in DB");
 
   return nodemailer.createTransport({
     service: "gmail",
@@ -21,9 +22,14 @@ async function getTransporter(){
 }
 
 
+
 // REGISTER
 router.post("/register", async(req,res)=>{
   const {email,password} = req.body;
+  
+  //this is duplicate check code to avoid tons of same email registered
+  const exists = await User.findOne({email});
+  if(exists) return res.json("Email already registered");
 
   const hash = await bcrypt.hash(password,10);
   const code = Math.floor(100000 + Math.random()*900000);
@@ -67,7 +73,7 @@ router.post("/login", async(req,res)=>{
   const match = await bcrypt.compare(password,user.password);
   if(!match) return res.json("Wrong password");
 
-  const token = jwt.sign({id:user._id},SECRET);
+const token = jwt.sign({ userId: user._id }, SECRET);
   res.json({token});
 });
 

@@ -1,5 +1,4 @@
 const jwt = require("jsonwebtoken");
-const JWT_SECRET = "secretcodexd";
 
 function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;
