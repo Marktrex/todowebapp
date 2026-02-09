@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Settings</title>
+</head>
+<body>
+  <h1>Settings</h1>
+
+    <h2>Change Password</h2>
+    <input type="password" id="oldPassword" placeholder="Old Password">
+    <input type="password" id="newPassword" placeholder="New Password">
+    <button onclick="changePassword()">Change Password</button>
+
+    <h2>Delete Account</h2>
+    <button onclick="deleteAccount()">Delete Account</button>
+
+    <script>
+    async function changePassword(){
+    const oldPassword = document.getElementById("oldPassword").value;
+    const newPassword = document.getElementById("newPassword").value;
+    const token = localStorage.getItem("token");
+
+    const res = await fetch("http://localhost:3000/auth/change-password", {
+        method:"POST",
+        headers:{
+        "Content-Type":"application/json",
+        "Authorization":"Bearer "+token
+        },
+        body: JSON.stringify({oldPassword,newPassword})
+    });
+
+    const data = await res.json();
+    alert(data.message);
+    }
+
+    async function deleteAccount(){
+    if(!confirm("Are you sure you want to delete your account?")) return;
+
+    const token = localStorage.getItem("token");
+
+    const res = await fetch("http://localhost:3000/auth/delete-account", {
+        method:"POST",
+        headers:{
+        "Authorization":"Bearer "+token
+        }
+    });
+
+    const data = await res.json();
+    alert(data.message);
+
+    if(data.message === "Account deleted") localStorage.removeItem("token");
+    window.location.href = "register.html";
+    }
+    </script>
+
+</body>
+</html>

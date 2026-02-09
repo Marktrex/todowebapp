@@ -43,3 +43,7 @@ Verison 2.3
 
 Version 2.4
 -added error codes in authroutes and changed some codes inside
+
+Version 2.5
+-added some html for the todowebb
+-added a changepassword and delete function

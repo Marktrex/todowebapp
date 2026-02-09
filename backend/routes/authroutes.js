@@ -10,7 +10,7 @@ const SECRET = process.env.JWT_SECRET;
 
 async function getTransporter(){
   const config = await EmailConfig.findOne();
-  if(!config) throw new Error("Email config not found in DB");
+  if(!config) throw new Error("No email config found in DB");
 
   return nodemailer.createTransport({
     service: "gmail",
@@ -24,47 +24,36 @@ async function getTransporter(){
 // REGISTER
 router.post("/register", async(req,res)=>{
   const {email,password} = req.body;
-  
-  const exists = await User.findOne({email});
-  // 409 Conflict: The email is already taken
-  if(exists) return res.status(409).json({ message: "Email already registered" });
 
   const hash = await bcrypt.hash(password,10);
   const code = Math.floor(100000 + Math.random()*900000);
 
-  await User.create({ email, password:hash, code });
+  await User.create({ email, password:hash, code, verified:false });
   
-  try {
-    const transporter = await getTransporter();
-    await transporter.sendMail({
-      to: email,
-      subject: "Verify Code",
-      text: "Your code: " + code
-    });
-    // 201 Created: Standard for successful registration
-    res.status(201).json({ message: "Registered. Check email." });
-  } catch (error) {
-    // 500 Internal Server Error: If the email fails to send
-    res.status(500).json({ message: "User created but email failed to send" });
-  }
+  const transporter = await getTransporter();
+  await transporter.sendMail({
+    to: email,
+    subject: "Verify Code",
+    text: "Your code: " + code
+  });
+
+  res.json({message:"Registered. Check email."});
 });
 
 // VERIFY
 router.post("/verify", async(req,res)=>{
   const {email,code} = req.body;
-  const user = await User.findOne({email});
 
-  if(!user) return res.status(404).json({ message: "User not found" });
+  const user = await User.findOne({email});
+  if(!user) return res.status(400).json({message:"User not found"});
 
   if(user.code == code){
     user.verified = true;
     await user.save();
-    // 200 OK: Request succeeded
-    return res.status(200).json({ message: "Verified" });
+    return res.json({message:"Verified"});
   }
 
-  // 400 Bad Request: The client sent the wrong code
-  res.status(400).json({ message: "Wrong code" });
+  res.status(400).json({message:"Wrong code"});
 });
 
 // LOGIN
@@ -72,19 +61,52 @@ router.post("/login", async(req,res)=>{
   const {email,password} = req.body;
 
   const user = await User.findOne({email});
-  
-  // 401 Unauthorized: Credentials (email/password) are wrong
-  if(!user) return res.status(401).json({ message: "Invalid credentials" });
-  
-  // 403 Forbidden: User is known but "blocked" because they aren't verified
-  if(!user.verified) return res.status(403).json({ message: "Account not verified" });
+  if(!user || !user.verified) return res.status(401).json({message:"Not verified"});
 
   const match = await bcrypt.compare(password,user.password);
-  if(!match) return res.status(401).json({ message: "Invalid credentials" });
+  if(!match) return res.status(401).json({message:"Wrong password"});
 
-  const token = jwt.sign({ userId: user._id }, SECRET);
-  // 200 OK: Standard for successful login
-  res.status(200).json({ token });
+  const token = jwt.sign({id:user._id},SECRET, {expiresIn:"1h"});
+  res.json({token});
+});
+
+// CHANGE PASSWORD
+router.post("/change-password", async(req,res)=>{
+  const authHeader = req.headers.authorization;
+  if(!authHeader) return res.status(401).json({message:"No token"});
+
+  const token = authHeader.split(" ")[1];
+  try{
+    const decoded = jwt.verify(token, SECRET);
+    const user = await User.findById(decoded.id);
+    if(!user) return res.status(404).json({message:"User not found"});
+
+    const {oldPassword,newPassword} = req.body;
+    const match = await bcrypt.compare(oldPassword,user.password);
+    if(!match) return res.status(400).json({message:"Wrong old password"});
+
+    user.password = await bcrypt.hash(newPassword,10);
+    await user.save();
+
+    res.json({message:"Password changed"});
+  } catch(err){
+    res.status(401).json({message:"Invalid token"});
+  }
+});
+
+// DELETE ACCOUNT
+router.post("/delete-account", async(req,res)=>{
+  const authHeader = req.headers.authorization;
+  if(!authHeader) return res.status(401).json({message:"No token"});
+
+  const token = authHeader.split(" ")[1];
+  try{
+    const decoded = jwt.verify(token, SECRET);
+    await User.findByIdAndDelete(decoded.id);
+    res.json({message:"Account deleted"});
+  } catch(err){
+    res.status(401).json({message:"Invalid token"});
+  }
 });
 
 module.exports = router;
