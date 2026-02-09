@@ -16,6 +16,8 @@ mongoose.connect("mongodb://127.0.0.1:27017/todowebapp")
 // routes
 const authRoutes = require("./routes/authroutes");
 app.use("/auth", authRoutes);
+const todoRoutes = require("./routes/todoroutes");
+app.use("/todo", todoRoutes);
 
 // start server
 app.listen(3000, () => {

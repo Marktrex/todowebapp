@@ -47,3 +47,7 @@ Version 2.4
 Version 2.5
 -added some html for the todowebb
 -added a changepassword and delete function
+
+Version 2.6
+-added a todo list successfully working
+-
